@@ -1,71 +1,37 @@
 #ifndef __DL_DEEP_H__
 #define __DL_DEEP_H__
 
+int add(int a, int b) {
+    return a + b;
+}
+
+int mul(int a, int b) {
+    return a * b;
+}
+
+typedef int (*OP)(int , int);
+
 class Deep {
     public:
-        virtual Deep* operator +(Deep *d) = 0;
-        virtual Deep* operator *(Deep *d) = 0;
-        virtual int eval() = 0;
-};
-
-class Op {
-    public:
-        virtual Deep* operate(Deep *d1, Deep *d2);
-};
-
-class AddOp : public Op {
-    public:
-        Deep* operate(Deep *d1, Deep *d2) {
-            return *d1 + d2;
+        Deep() {}
+        Deep(int value):result(value) {}
+        Deep(Deep &_d1, Deep &_d2, OP _op):d1(&_d1), d2(&_d2), op(_op) {}
+        Deep operator +(Deep& d) {
+            return Deep(*this, d, add);
         }
-};
-
-class MulOp : public Op {
-    public:
-        Deep* operate(Deep *d1, Deep *d2) {
-            return *d1 * d2;
-        }
-};
-
-class DeepOpDeep : public Deep {
-    public:
-        DeepOpDeep() {}
-        DeepOpDeep(Deep *_d1, Deep *_d2, Op *_op):d1(_d1), d2(_d2), op(_op) {}
-        Deep* operator +(Deep *d) {
-            return new DeepOpDeep(this, d, new AddOp());
-        }
-        Deep* operator *(Deep *d) {
-            return new DeepOpDeep(this, d, new MulOp());
+        Deep operator *(Deep& d) {
+            return Deep(*this, d, mul);
         }
         int eval() {
-            return op->operate(d1, d2)->eval();
+            if(op != NULL) {
+                result = op(d1->eval(), d2->eval());
+            }
+            return result;
         }
     private:
-        Deep *d1;
-        Deep *d2;
-        Op *op;
+        Deep *d1, *d2;
+        OP op = NULL;
+        int result;
 };
-
-class Variable : public Deep {
-    public:
-        Variable(int k);
-        Deep* operator +(Deep *d);
-        Deep* operator *(Deep *d);
-        int eval() { return value; }
-    private:
-        int value;
-};
-
-Variable::Variable(int k):value(k) {}
-
-Deep* Variable::operator +(Deep *d) {
-    return new DeepOpDeep(this, d, new AddOp());
-}
-
-Deep* Variable::operator *(Deep *d) {
-    return new DeepOpDeep(this, d, new MulOp());
-}
-
-
 
 #endif
