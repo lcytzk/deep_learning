@@ -1,11 +1,13 @@
 #include <cstdio>
 #include "deep.h"
+#include "Eigen/Dense"
+
+using namespace Eigen;
 
 int main(int argc, char *argv[]) {
-    Deep v1(3);
-    Deep v2(4);
-    Deep v3(5);
-    auto res = v1 * v2 + v3;
-    printf("%d\n", res.eval());
+    Deep<float> v2(4.2);
+    Deep<float> v3(5.3);
+    auto res = v2 + v3;
+    printf("%f\n", res.eval());
     return 0;
 }
